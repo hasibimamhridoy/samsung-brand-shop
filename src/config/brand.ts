@@ -20,9 +20,11 @@ export const brand = {
     itemDescription: "Item Description",
     qty: "Qty",
     unitPrice: "Unit Price",
+    discount: "Discount",
     total: "Total",
   },
   grandTotalLabel: "Grand Total",
+  totalDiscountLabel: "Total Discount",
 
   notes: [
     "Goods once sold will not be returned or exchanged without prior approval.",

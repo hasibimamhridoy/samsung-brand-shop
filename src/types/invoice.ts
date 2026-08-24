@@ -3,4 +3,5 @@ export interface InvoiceItem {
   name: string;
   qty: number;
   unitPrice: number;
+  discount: number;
 }

@@ -9,8 +9,16 @@ interface InvoicePreviewProps {
   date: string;
   customerName: string;
   customerPhone: string;
+  customerAddress: string;
   items: InvoiceItem[];
+  totalDiscount: number;
   grandTotal: number;
+}
+
+function lineTotal(item: InvoiceItem): number {
+  const subtotal = item.qty * item.unitPrice;
+  const discount = Math.min(Math.max(item.discount, 0), subtotal);
+  return subtotal - discount;
 }
 
 export default function InvoicePreview({
@@ -18,7 +26,9 @@ export default function InvoicePreview({
   date,
   customerName,
   customerPhone,
+  customerAddress,
   items,
+  totalDiscount,
   grandTotal,
 }: InvoicePreviewProps) {
   const filledRows = items.filter((item) => item.name.trim().length > 0);
@@ -57,7 +67,7 @@ export default function InvoicePreview({
           <span className="font-semibold">Date:</span> {date || "—"}
         </span>
       </div>
-      <div className="flex flex-wrap items-baseline justify-between gap-2 px-8 pt-2 pb-4 text-sm">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 px-8 pt-2 text-sm">
         <span>
           <span className="font-semibold">Customer Name:</span>{" "}
           {customerName || (
@@ -70,6 +80,12 @@ export default function InvoicePreview({
             <span className="inline-block w-32 border-b border-slate-400" />
           )}
         </span>
+      </div>
+      <div className="px-8 pt-2 pb-4 text-sm">
+        <span className="font-semibold">Address:</span>{" "}
+        {customerAddress || (
+          <span className="inline-block w-64 border-b border-slate-400" />
+        )}
       </div>
 
       <div className="px-8">
@@ -87,6 +103,9 @@ export default function InvoicePreview({
               </th>
               <th className="w-24 border border-slate-300 px-2 py-2 text-center font-semibold">
                 {brand.tableHeaders.unitPrice}
+              </th>
+              <th className="w-20 border border-slate-300 px-2 py-2 text-center font-semibold">
+                {brand.tableHeaders.discount}
               </th>
               <th className="w-28 border border-slate-300 px-2 py-2 text-center font-semibold">
                 {brand.tableHeaders.total}
@@ -109,7 +128,10 @@ export default function InvoicePreview({
                   {formatAmount(item.unitPrice)}
                 </td>
                 <td className="border border-slate-300 px-2 py-2 text-right">
-                  {formatAmount(item.qty * item.unitPrice)}
+                  {item.discount > 0 ? formatAmount(item.discount) : "—"}
+                </td>
+                <td className="border border-slate-300 px-2 py-2 text-right">
+                  {formatAmount(lineTotal(item))}
                 </td>
               </tr>
             ))}
@@ -120,13 +142,27 @@ export default function InvoicePreview({
                 <td className="border border-slate-300 px-2 py-3">&nbsp;</td>
                 <td className="border border-slate-300 px-2 py-3">&nbsp;</td>
                 <td className="border border-slate-300 px-2 py-3">&nbsp;</td>
+                <td className="border border-slate-300 px-2 py-3">&nbsp;</td>
               </tr>
             ))}
           </tbody>
           <tfoot>
+            {totalDiscount > 0 && (
+              <tr className="bg-slate-50 font-semibold">
+                <td
+                  colSpan={5}
+                  className="border border-slate-300 px-2 py-2 text-right"
+                >
+                  {brand.totalDiscountLabel}
+                </td>
+                <td className="border border-slate-300 px-2 py-2 text-right">
+                  - {brand.currencySymbol} {formatAmount(totalDiscount)}
+                </td>
+              </tr>
+            )}
             <tr className="bg-slate-100 font-bold">
               <td
-                colSpan={4}
+                colSpan={5}
                 className="border border-slate-300 px-2 py-2 text-right"
               >
                 {brand.grandTotalLabel}

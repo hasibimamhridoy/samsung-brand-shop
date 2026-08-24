@@ -13,7 +13,14 @@ function emptyItem(): InvoiceItem {
     name: "",
     qty: 1,
     unitPrice: 0,
+    discount: 0,
   };
+}
+
+function lineTotal(item: InvoiceItem): number {
+  const subtotal = item.qty * item.unitPrice;
+  const discount = Math.min(Math.max(item.discount, 0), subtotal);
+  return subtotal - discount;
 }
 
 export default function InvoiceApp() {
@@ -21,6 +28,7 @@ export default function InvoiceApp() {
   const [date, setDate] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
   const [items, setItems] = useState<InvoiceItem[]>([emptyItem()]);
   const [isDownloading, setIsDownloading] = useState(false);
   const formId = useId();
@@ -37,10 +45,12 @@ export default function InvoiceApp() {
     setDate(formatDate(new Date()));
   }, []);
 
-  const grandTotal = items.reduce(
-    (sum, item) => sum + item.qty * item.unitPrice,
+  const totalDiscount = items.reduce(
+    (sum, item) =>
+      sum + Math.min(Math.max(item.discount, 0), item.qty * item.unitPrice),
     0,
   );
+  const grandTotal = items.reduce((sum, item) => sum + lineTotal(item), 0);
 
   function updateItem(id: string, patch: Partial<InvoiceItem>) {
     setItems((prev) =>
@@ -61,6 +71,7 @@ export default function InvoiceApp() {
   function startNewInvoice() {
     setCustomerName("");
     setCustomerPhone("");
+    setCustomerAddress("");
     setItems([emptyItem()]);
     setDate(formatDate(new Date()));
     setMemoNo(generateMemoNo(brand.memoPrefix));
@@ -140,6 +151,16 @@ export default function InvoiceApp() {
               />
             </label>
           </div>
+          <label className="block text-sm">
+            <span className="mb-1 block text-slate-600">কাস্টমারের ঠিকানা</span>
+            <input
+              type="text"
+              value={customerAddress}
+              onChange={(e) => setCustomerAddress(e.target.value)}
+              placeholder="কাস্টমারের ঠিকানা লিখুন"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </label>
         </div>
 
         <div className="space-y-3">
@@ -210,16 +231,48 @@ export default function InvoiceApp() {
                     placeholder="একক মূল্য"
                     className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:col-span-2"
                   />
+                  <label className="block text-sm sm:col-span-3">
+                    <span className="mb-1 block text-xs text-slate-500">
+                      ডিস্কাউন্ট ({brand.currencySymbol})
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={item.discount}
+                      onChange={(e) =>
+                        updateItem(item.id, {
+                          discount: Number(e.target.value) || 0,
+                        })
+                      }
+                      placeholder="ডিস্কাউন্ট"
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    />
+                  </label>
+                  <div className="flex items-end justify-end text-sm font-medium text-slate-600 sm:col-span-3">
+                    লাইন টোটাল: {brand.currencySymbol}{" "}
+                    {lineTotal(item).toFixed(2)}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-900">
-            <span>গ্র্যান্ড টোটাল</span>
-            <span>
-              {brand.currencySymbol} {grandTotal.toFixed(2)}
-            </span>
+          <div className="space-y-1 rounded-xl bg-blue-50 px-4 py-3 text-sm">
+            {totalDiscount > 0 && (
+              <div className="flex items-center justify-between text-blue-800">
+                <span>মোট ডিস্কাউন্ট</span>
+                <span>
+                  - {brand.currencySymbol} {totalDiscount.toFixed(2)}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center justify-between font-semibold text-blue-900">
+              <span>গ্র্যান্ড টোটাল</span>
+              <span>
+                {brand.currencySymbol} {grandTotal.toFixed(2)}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -258,7 +311,9 @@ export default function InvoiceApp() {
           date={date}
           customerName={customerName}
           customerPhone={customerPhone}
+          customerAddress={customerAddress}
           items={items}
+          totalDiscount={totalDiscount}
           grandTotal={grandTotal}
         />
       </section>
