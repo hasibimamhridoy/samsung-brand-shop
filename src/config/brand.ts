@@ -18,6 +18,7 @@ export const brand = {
   tableHeaders: {
     sl: "SL",
     itemDescription: "Item Description",
+    imei: "IMEI",
     qty: "Qty",
     unitPrice: "Unit Price",
     discount: "Discount",

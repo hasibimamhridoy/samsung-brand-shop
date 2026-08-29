@@ -14,6 +14,7 @@ function emptyItem(): InvoiceItem {
     qty: 1,
     unitPrice: 0,
     discount: 0,
+    imei: "",
   };
 }
 
@@ -249,7 +250,21 @@ export default function InvoiceApp() {
                       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
                   </label>
-                  <div className="flex items-end justify-end text-sm font-medium text-slate-600 sm:col-span-3">
+                  <label className="block text-sm sm:col-span-3">
+                    <span className="mb-1 block text-xs text-slate-500">
+                      IMEI নম্বর
+                    </span>
+                    <input
+                      type="text"
+                      value={item.imei}
+                      onChange={(e) =>
+                        updateItem(item.id, { imei: e.target.value })
+                      }
+                      placeholder="IMEI নম্বর (ঐচ্ছিক)"
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    />
+                  </label>
+                  <div className="flex items-end justify-end text-sm font-medium text-slate-600 sm:col-span-6">
                     লাইন টোটাল: {brand.currencySymbol}{" "}
                     {lineTotal(item).toFixed(2)}
                   </div>

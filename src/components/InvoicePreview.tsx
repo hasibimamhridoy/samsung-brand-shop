@@ -98,6 +98,9 @@ export default function InvoicePreview({
               <th className="border border-slate-300 px-2 py-2 text-left font-semibold">
                 {brand.tableHeaders.itemDescription}
               </th>
+              <th className="w-32 border border-slate-300 px-2 py-2 text-center font-semibold">
+                {brand.tableHeaders.imei}
+              </th>
               <th className="w-16 border border-slate-300 px-2 py-2 text-center font-semibold">
                 {brand.tableHeaders.qty}
               </th>
@@ -121,6 +124,9 @@ export default function InvoicePreview({
                 <td className="border border-slate-300 px-2 py-2">
                   {item.name}
                 </td>
+                <td className="border border-slate-300 px-2 py-2 text-center font-mono text-xs">
+                  {item.imei.trim() || "—"}
+                </td>
                 <td className="border border-slate-300 px-2 py-2 text-center">
                   {item.qty}
                 </td>
@@ -143,6 +149,7 @@ export default function InvoicePreview({
                 <td className="border border-slate-300 px-2 py-3">&nbsp;</td>
                 <td className="border border-slate-300 px-2 py-3">&nbsp;</td>
                 <td className="border border-slate-300 px-2 py-3">&nbsp;</td>
+                <td className="border border-slate-300 px-2 py-3">&nbsp;</td>
               </tr>
             ))}
           </tbody>
@@ -150,7 +157,7 @@ export default function InvoicePreview({
             {totalDiscount > 0 && (
               <tr className="bg-slate-50 font-semibold">
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="border border-slate-300 px-2 py-2 text-right"
                 >
                   {brand.totalDiscountLabel}
@@ -162,7 +169,7 @@ export default function InvoicePreview({
             )}
             <tr className="bg-slate-100 font-bold">
               <td
-                colSpan={5}
+                colSpan={6}
                 className="border border-slate-300 px-2 py-2 text-right"
               >
                 {brand.grandTotalLabel}
