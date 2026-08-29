@@ -124,7 +124,7 @@ export default function InvoicePreview({
                 <td className="border border-slate-300 px-2 py-2">
                   {item.name}
                 </td>
-                <td className="border border-slate-300 px-2 py-2 text-center font-mono text-xs">
+                <td className="border border-slate-300 px-2 py-2 text-center font-mono">
                   {item.imei.trim() || "—"}
                 </td>
                 <td className="border border-slate-300 px-2 py-2 text-center">
