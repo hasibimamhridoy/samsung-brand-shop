@@ -94,6 +94,18 @@ export default function InvoiceApp() {
       const canvas = await html2canvas(element, {
         scale: 2,
         backgroundColor: "#ffffff",
+        // The on-screen preview is a narrow, shadowed card (max-w-[700px])
+        // meant for the page layout — it doesn't match what @media print
+        // renders (a full A4-width, edge-to-edge sheet with 10mm padding,
+        // no shadow/ring). Reproduce that same print box on the clone so
+        // the downloaded PDF's proportions match the printed page exactly.
+        onclone: (_document, clonedElement) => {
+          clonedElement.style.width = "210mm";
+          clonedElement.style.maxWidth = "210mm";
+          clonedElement.style.margin = "0";
+          clonedElement.style.padding = "10mm";
+          clonedElement.style.boxShadow = "none";
+        },
       });
       // JPEG keeps the PDF a few hundred KB; jsPDF embeds PNG data
       // uncompressed, which would otherwise balloon it to several MB.
@@ -101,9 +113,29 @@ export default function InvoiceApp() {
 
       const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
       const pageWidth = pdf.internal.pageSize.getWidth();
-      const imageHeight = (canvas.height * pageWidth) / canvas.width;
+      const pageHeight = pdf.internal.pageSize.getHeight();
 
-      pdf.addImage(imageData, "JPEG", 0, 0, pageWidth, imageHeight);
+      // The invoice (notes + signatures + footer) is slightly taller than
+      // one A4 page at full size, which left the signature lines and
+      // footer clipped off the bottom. Scale to fit within one page
+      // instead, so the whole memo — footer included — stays on one page.
+      const scale = Math.min(
+        pageWidth / canvas.width,
+        pageHeight / canvas.height,
+      );
+      const renderWidth = canvas.width * scale;
+      const renderHeight = canvas.height * scale;
+      const offsetX = (pageWidth - renderWidth) / 2;
+      const offsetY = (pageHeight - renderHeight) / 2;
+
+      pdf.addImage(
+        imageData,
+        "JPEG",
+        offsetX,
+        offsetY,
+        renderWidth,
+        renderHeight,
+      );
       pdf.save(`${memoNo || "invoice"}.pdf`);
     } finally {
       setIsDownloading(false);
